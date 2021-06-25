@@ -1,13 +1,13 @@
-DROP TABLE IF EXISTS reviews;
-DROP TABLE IF EXISTS characteristics;
 DROP TABLE IF EXISTS char_reviews;
 DROP TABLE IF EXISTS photos;
+DROP TABLE IF EXISTS characteristics;
+DROP TABLE IF EXISTS reviews;
 
 CREATE TABLE IF NOT EXISTS reviews (
   id SERIAL PRIMARY KEY,
   product_id INT NOT NULL,
   rating INT NOT NULL,
-  date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date BIGINT NOT NULL,
   summary VARCHAR(500) NOT NULL,
   body VARCHAR(1000) NOT NULL,
   recommend BOOLEAN NOT NULL DEFAULT false,
@@ -26,10 +26,10 @@ CREATE TABLE IF NOT EXISTS characteristics (
 
 CREATE TABLE IF NOT EXISTS char_reviews (
   id SERIAL PRIMARY KEY,
-  value INT NOT NULL DEFAULT 0,
   char_id INT NOT NULL,
   reviews_id INT NOT NULL,
-  CONSTRAINT fk_characteristics_id
+  value INT NOT NULL DEFAULT 0,
+  CONSTRAINT fk_characteristics
     FOREIGN KEY(char_id)
       REFERENCES characteristics(id),
   CONSTRAINT fk_reviews_id
@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS char_reviews (
 
 CREATE TABLE IF NOT EXISTS photos (
   id SERIAL PRIMARY KEY,
-  url VARCHAR(5000) NOT NULL,
   reviews_id INT NOT NULL,
-  CONSTRAINT fk_photo_reviews
+  url VARCHAR(5000) NOT NULL,
+  CONSTRAINT fk_photos_reviews_id
     FOREIGN KEY(reviews_id)
 	    REFERENCES reviews(id)
 );
