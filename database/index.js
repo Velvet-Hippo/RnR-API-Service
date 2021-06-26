@@ -8,6 +8,7 @@ const pool = new Pool(config);
 // });
 
 pool.connect(() => {
+  // eslint-disable-next-line no-console
   console.log('connected to postgreSQL');
 });
 

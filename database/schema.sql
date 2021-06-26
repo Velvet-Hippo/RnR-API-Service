@@ -45,3 +45,10 @@ CREATE TABLE IF NOT EXISTS photos (
     FOREIGN KEY(reviews_id)
 	    REFERENCES reviews(id)
 );
+
+-- GRANT SELECT, INSERT, UPDATE, DELETE
+-- ON reviews, characteristics
+-- TO db_controller;
+
+-- ALTER TABLE  reviews
+  -- ALTER COLUMN date TYPE TIMESTAMP USING to_timestamp(date / 1000) + ((date % 1000) || ' milliseconds') :: INTERVAL;
