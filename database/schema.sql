@@ -52,3 +52,14 @@ CREATE TABLE IF NOT EXISTS photos (
 
 -- ALTER TABLE  reviews
   -- ALTER COLUMN date TYPE TIMESTAMP USING to_timestamp(date / 1000) + ((date % 1000) || ' milliseconds') :: INTERVAL;
+
+  -- create temp table urls as select reviews_id, array_agg(url) as urls from photos group by reviews_id;
+-- update reviews set photos = urls from urls where reviews.id = urls.reviews_id
+
+--   update photos
+-- set url = url_list
+-- from (
+-- SELECT reviews_id, array_agg(url) as url_list
+-- FROM photos
+-- GROUP BY reviews_id
+-- ) as a

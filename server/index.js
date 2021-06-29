@@ -1,8 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const reviews = require('../models/reviews');
-const photos = require('../models/photos');
-const characteristics = require('../models/characteristics');
+const { addHelpful, reportReview } = require('../models/helpful-report');
 
 const port = 3000;
 const app = express();
@@ -21,17 +20,9 @@ app.get('/reviews/:id', (req, res) => {
 app.post('/reviews', (req, res) => {
   const reviewInput = [req.body.product_id, req.body.rating,
     new Date(), req.body.summary, req.body.body, req.body.recommend,
-    req.body.name, req.body.email];
-  function addValues(input) {
-    const charInput = req.body.characteristics;
-    let charValues = [];
-    const charKeys = Object.keys(charInput);
-    charKeys.forEach((key) => {
-      charValues.push(`(${key}, ${input}, ${charInput[key]})`);
-    });
-    return charValues.join(',');
-  }
-  reviews.addReview(reviewInput, addValues, (err, result) => {
+    req.body.name, req.body.email, req.body.photos.toString()];
+  const charInput = req.body.characteristics;
+  reviews.addReview(reviewInput, charInput, (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -40,8 +31,9 @@ app.post('/reviews', (req, res) => {
   });
 });
 
-app.get('/photos/:id', (req, res) => {
-  photos.getPhotos([req.params.id], (err, result) => {
+app.put('/reviews/:id/helpful', (req, res) => {
+  const input = req.params.id;
+  addHelpful(input, (err, result) => {
     if (err) {
       res.status(400).send(err);
     } else {
@@ -50,8 +42,9 @@ app.get('/photos/:id', (req, res) => {
   });
 });
 
-app.get('/characteristics/:id', (req, res) => {
-  characteristics.getChar([req.params.id], (err, result) => {
+app.put('/reviews/:id/report', (req, res) => {
+  const input = req.params.id;
+  reportReview(input, (err, result) => {
     if (err) {
       res.status(400).send(err);
     } else {

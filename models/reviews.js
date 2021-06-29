@@ -12,40 +12,31 @@ module.exports = {
     });
   },
 
-  addReview(reviewInput, addValues, callback) {
+  addReview(reviewInput, charInput, callback) {
     // eslint-disable-next-line no-multi-str
     (async () => {
+      function addValues(input) {
+        const charKeys = Object.keys(charInput);
+        return charKeys.map((key) => `(${key}, ${input}, ${charInput[key]})`);
+      }
       // note: we don't try/catch this because if connecting throws an exception
       // we don't need to dispose of the client (it will be undefined)
       const client = await pool.connect();
       try {
         await client.query('BEGIN');
-        const queryText = 'INSERT INTO reviews (product_id, rating, date, summary, body, recommend, reviewer_name, reviewer_email) values ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id';
+        const queryText = 'INSERT INTO reviews (product_id, rating, date, summary, body, recommend, reviewer_name, reviewer_email, photos) values ($1, $2, $3, $4, $5, $6, $7, $8, ARRAY[$9]) RETURNING id';
         const res = await client.query(queryText, reviewInput);
-        // console.log(charValues);
         const values = addValues(res.rows[0].id);
-        const insertCharQuery = `INSERT INTO char_reviews (char_id, reviews_id, value) VALUES ${values}`;
-        // let insertCharValues = [parseInt(current), res.rows[0].id, charInput[current]];
+        const insertCharQuery = `INSERT INTO char_reviews (char_id, reviews_id, value) VALUES ${values.join(',')}`;
         await client.query(insertCharQuery);
         await client.query('COMMIT');
       } catch (e) {
         await client.query('ROLLBACK');
         callback(e, null);
       } finally {
-        callback(null);
+        callback(null, 'successful insert');
         client.release();
       }
     })().catch((e) => console.error(e.stack));
   },
-
 };
-
-// {
-//   "product_id": 18078,
-//   "rating": 5,
-//   "summary": "Pretty neat product",
-//   "name": "Billy Joe Bob",
-//   "body": "Puppies really are the best! Kitties are wonderful too though! Honestly, just animals in general rock!",
-//   "recommend": true,
-//   "email": "test@gmail.com"
-// }
