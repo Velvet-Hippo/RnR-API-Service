@@ -63,3 +63,36 @@ CREATE TABLE IF NOT EXISTS photos (
 -- FROM photos
 -- GROUP BY reviews_id
 -- ) as a
+
+-- CREATE INDEX ${index name} ON ${table name} (column1, column2, etc.)
+-- My in code EX: CREATE INDEX productId_idx ON questions (productId);
+-- My in code EX for multicolum: CREATE INDEX answersForQs_idx ON answers (questionId, reported);
+
+-- CREATE TABLE char_agg (
+--   id BIGSERIAL PRIMARY KEY,
+--   name VARCHAR(7) NOT NULL,
+--   value REAL NOT NULL,
+--   product_id INT NOT NULL
+-- );
+
+-- CREATE TABLE char_agg as SELECT
+-- char.name, char.id, AVG(rc.value) AS value, product_id
+-- FROM characteristics AS char
+-- INNER JOIN char_reviews AS rc
+-- ON char.id = rc.char_id
+-- GROUP BY char.id;
+
+-- CREATE USER newuser WITH PASSWORD '12345';
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO reviews_user;
+-- GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO reviews_user;
+-- SELECT table_catalog, table_schema, table_name, privilege_type
+-- FROM   information_schema.table_privileges
+-- WHERE  grantee = 'MY_USER'
+-- ALTER SEQUENCE ${table}_${column}_seq RESTART WITH ${newStart}(edited)
+-- CREATE INDEX ${index name} ON ${table name} (column1, column2, etc.)
+-- My in code EX: CREATE INDEX productId_idx ON questions (productId);
+-- My in code EX for multicolum: CREATE INDEX answersForQs_idx ON answers (questionId, reported);
+-- Add photos column to answers table, Create temp table to store photo urls in an array per answer id - then reassign the photos column in answers to be these values:
+-- ALTER TABLE answers ADD photos TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]
+-- CREATE TEMP TABLE urls AS SELECT answer_id, array_agg(url) as url_list FROM answers_photos GROUP BY answer_id;
+-- UPDATE answers SET photos = url_list FROM urls WHERE answers.id = urls.answer_id;

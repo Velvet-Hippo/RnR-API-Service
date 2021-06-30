@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const db = require('../database/index');
 const reviews = require('../models/reviews');
+const { getAsyncMeta } = require('../models/char_reviews');
 const { addHelpful, reportReview } = require('../models/helpful-report');
 
 const port = 3000;
@@ -22,11 +24,21 @@ app.post('/reviews', (req, res) => {
     new Date(), req.body.summary, req.body.body, req.body.recommend,
     req.body.name, req.body.email, req.body.photos.toString()];
   const charInput = req.body.characteristics;
+  const productId = req.body.product_id;
   reviews.addReview(reviewInput, charInput, (err, result) => {
     if (err) {
       console.log(err);
     } else {
       res.status(200).send(result);
+      db.query(`UPDATE char_agg SET value = calc.value
+      FROM (SELECT
+        char.id, AVG(rc.value) AS value
+        FROM characteristics AS char
+        INNER JOIN char_reviews AS rc
+        ON char.id = rc.char_id
+        WHERE product_id = ${productId}
+        GROUP BY char.id) AS calc
+      WHERE char_agg.id = calc.id;`);
     }
   });
 });
@@ -49,6 +61,17 @@ app.put('/reviews/:id/report', (req, res) => {
       res.status(400).send(err);
     } else {
       res.status(200).send(result.rows);
+    }
+  });
+});
+
+app.get('/meta/:id', (req, res) => {
+  const input = req.params.id;
+  getAsyncMeta(input, (err, result) => {
+    if (err) {
+      res.status(400).send(err);
+    } else {
+      res.status(200).send(result);
     }
   });
 });
