@@ -8,13 +8,16 @@ const { addHelpful, reportReview } = require('../models/helpful-report');
 const port = 3000;
 const app = express();
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/reviews/:id', (req, res) => {
-  reviews.getProductReviews([req.params.id], (err, result) => {
+  const page = req.query.page || 1;
+  const count = req.query.page || 5;
+  reviews.getProductReviews(page, count, req.params.id, (err, result) => {
     if (err) {
       res.status(400).send(err);
     } else {
-      res.status(200).send(result.rows);
+      res.status(200).send(result);
     }
   });
 });
@@ -32,7 +35,7 @@ app.post('/reviews', (req, res) => {
       res.status(200).send(result);
       db.query(`UPDATE char_agg SET value = calc.value
       FROM (SELECT
-        char.id, AVG(rc.value) AS value
+        charid, AVG(rc.value) AS value
         FROM characteristics AS char
         INNER JOIN char_reviews AS rc
         ON char.id = rc.char_id

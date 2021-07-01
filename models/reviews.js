@@ -1,13 +1,26 @@
 const pool = require('../database/index');
 
 module.exports = {
-  getProductReviews(productId, callback) {
-    const getAllQuery = 'select * from reviews where product_id = $1 AND reported = false ORDER BY helpfulness DESC, date DESC';
-    pool.query(getAllQuery, productId, (err, result) => {
+  getProductReviews(queryPage, queryCount, productId, callback) {
+    let offset = '';
+    if (queryPage > 0) {
+      offset = `OFFSET ${queryCount * (queryPage - 1)};`;
+    }
+    const resultObj = {
+      product: productId,
+      page: queryPage,
+      count: queryCount,
+      results: [],
+    };
+    const getAllQuery = `select * from reviews where product_id = ${productId}
+     AND reported = false ORDER BY helpfulness DESC, date DESC
+     LIMIT ${queryCount} ${offset}`;
+    pool.query(getAllQuery, (err, result) => {
       if (err) {
         callback(err, null);
       } else {
-        callback(null, result);
+        resultObj.results = result.rows;
+        callback(null, resultObj);
       }
     });
   },
